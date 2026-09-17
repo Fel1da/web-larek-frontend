@@ -1,42 +1,43 @@
-export type ApiListResponse<Type> = {
-    total: number,
-    items: Type[]
-};
+import type { IApi, IApiError } from '../../types'; 
 
-export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+export class Api implements IApi {
+	constructor(
+		protected baseUrl: string,
+		protected options: RequestInit = {}
+	) {}
 
-export class Api {
-    readonly baseUrl: string;
-    protected options: RequestInit;
+	protected async request<T>(
+		uri: string,
+		options: RequestInit
+	): Promise<T> {
+		const response = await fetch(this.baseUrl + uri, {
+			...this.options,
+			...options,
+			headers: {
+				'Content-Type': 'application/json',
+				...this.options.headers,
+				...options.headers,
+			},
+		});
 
-    constructor(baseUrl: string, options: RequestInit = {}) {
-        this.baseUrl = baseUrl;
-        this.options = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...(options.headers as object ?? {})
-            }
-        };
-    }
+		if (!response.ok) {
+			const error: IApiError = await response
+				.json()
+				.catch(() => ({ error: `HTTP ${response.status}` }));
+			throw new Error(error.error);
+		}
 
-    protected handleResponse(response: Response): Promise<object> {
-        if (response.ok) return response.json();
-        else return response.json()
-            .then(data => Promise.reject(data.error ?? response.statusText));
-    }
+		return (await response.json()) as T;
+	}
 
-    get(uri: string) {
-        return fetch(this.baseUrl + uri, {
-            ...this.options,
-            method: 'GET'
-        }).then(this.handleResponse);
-    }
+	get<T>(uri: string): Promise<T> {
+		return this.request<T>(uri, { method: 'GET' });
+	}
 
-    post(uri: string, data: object, method: ApiPostMethods = 'POST') {
-        return fetch(this.baseUrl + uri, {
-            ...this.options,
-            method,
-            body: JSON.stringify(data)
-        }).then(this.handleResponse);
-    }
+	post<T>(uri: string, data: object, method = 'POST'): Promise<T> {
+		return this.request<T>(uri, {
+			method,
+			body: JSON.stringify(data),
+		});
+	}
 }
