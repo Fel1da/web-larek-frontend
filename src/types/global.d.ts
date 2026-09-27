@@ -55,9 +55,7 @@ declare module '*.ttf' {
 
 declare namespace NodeJS {
 	interface ProcessEnv {
-		/** Адрес API-сервера, подставляется Webpack'ом из .env */
 		API_ORIGIN: string;
-		/** Флаг production-сборки */
 		NODE_ENV?: 'development' | 'production';
 	}
 }
