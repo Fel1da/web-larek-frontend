@@ -72,12 +72,11 @@ npm run build
 
 - **Component\<T\>** (`src/components/base/Component.ts`) — абстрактный базовый
   компонент отображения. Хранит корневой DOM-элемент в защищённом поле
-  `container`, предоставляет защищённые хелперы `setText`, `setImage`,
-  `toggleClass`, `setDisabled` и публичный метод `render(data?)`, который
+  `container`, предоставляет защищённый метод `setText` и публичный метод `render(data?)`, который
   подставляет данные в поля класса и возвращает корневой элемент.
 
 - **Model\<T\>** (`src/components/base/Model.ts`) — абстрактная модель данных.
-  Хранит `data` и ссылку на `EventEmitter`. Метод `emitChanges(event, payload)`
+  Хранит `data` и ссылку на `EventEmitter`. Метод `emitChanges(event)`
   инициирует событие брокера; `getData()` возвращает копию данных.
 
 - **LarekApi** (`src/components/LarekApi.ts`) — расширяет `Api`.
@@ -93,8 +92,8 @@ npm run build
 
 - **OrderModel** (`src/components/models/OrderModel.ts`) — данные покупателя
   (`payment`, `address`, `email`, `phone`). Методы: `setFields`, `getData`,
-  `validate`, `clear`. Не эмитит события сам по себе — валидация и эмит
-  выполняются в презентере на основе события `order:changed`.
+  `validate`, `clear`. При изменениях эмитит `order:validation-changed`;
+  презентер считывает из модели значения и ошибки и обновляет формы.
 
 ### Компоненты отображения
 
@@ -103,13 +102,13 @@ npm run build
 
 окно. Методы `open`, `close`, сеттер `content` для подстановки содержимого. Закрывается кликом по фону и по крестику; при закрытии эмитит `modal:close`.
 - **Header** — кнопка корзины со счётчиком. Сеттер `counter`. Эмитит `basket:open`.
-- **Gallery** — контейнер каталога. Метод `setItems(items)` принимает фабрику карточек через конструктор (слабое связывание). Клик по карточке эмитит `product:select { id }`.
+- **Gallery** — контейнер каталога. Сеттер `items` принимает готовые элементы карточек. Карточки сообщают о клике событием `product:select { id }`.
 - **Card** (абстрактный) — базовые сеттеры `title`, `price`.
   Наследники:
   - **CardCatalog** — карточка каталога (`image`, `category`);
-  - **CardPreview** — карточка детального просмотра (`image`, `category`, `description`, `inCart`, `onClick`, `disabled`);
+  - **CardPreview** — карточка детального просмотра (`image`, `category`, `description`, `inCart`, `disabled`);
   - **CardBasket** — компактная карточка в корзине (`index`, кнопка удаления).
-- **Basket** — содержимое корзины. Метод `setItems(items, total)` рендерит карточки через фабрику и подставляет сумму. Кнопка «Оформить» эмитит `order:open`.
+- **Basket** — содержимое корзины. Сеттеры `items` и `total` выводят готовые карточки и сумму. Кнопка «Оформить» эмитит `order:open`.
 - **Form** (абстрактный) — базовая форма. Сеттер `valid` управляет доступностью submit, `setErrors(errors)` выводит сообщения об ошибках.
   Наследники:
   - **OrderForm** — выбор оплаты (`card` / `cash`) и адрес доставки;
@@ -122,8 +121,8 @@ npm run build
 
 1. **Загрузка каталога.** `LarekApi.getProducts()` - `productsModel.setProducts()` -  `products:loaded` - галерея перерисовывается.
 2. **Просмотр товара.** Клик по карточке - `product:select { id }` - `productsModel.setPreview()` - `preview:changed` - модалка с `CardPreview`.
-3. **Корзина.** Кнопка «Купить/Убрать» - `cartModel.add/remove` - `cart:changed` - счётчик в хедере обновляется. Открытие корзины - `basket:open` - модалка с `Basket`.
-4. **Оформление.** «Оформить» - `order:open` - `OrderForm`. Ввод полей формы - `order:changed` - `OrderModel.validate()` - презентер дизейблит/включает кнопку и выводит ошибки. Далее - `order:submit` - `ContactsForm` - `contacts:submit` - `LarekApi.createOrder()` - модалка с `Success`.
+3. **Корзина.** Кнопка «Купить/Убрать» - `cartModel.add/remove` - `cart:changed` - обновляются счётчик, содержимое корзины и состояние превью. Открытие корзины - `basket:open` - модалка с `Basket`.
+4. **Оформление.** «Оформить» - `order:open` - `OrderForm`. Ввод полей формы - `order:changed` - `OrderModel.setFields()` - `order:validation-changed` - презентер дизейблит/включает кнопку и выводит ошибки. Далее - `order:submit` - `ContactsForm` - `contacts:submit` - `LarekApi.createOrder()` - модалка с `Success`.
 
 ### Типы данных
 
