@@ -1,6 +1,6 @@
 import { Card } from './Card';
 
-export class CardBasket extends Card {
+export class CardBasket extends Card<{ title: string; price: number | null; index: number }> {
 	protected _index: HTMLElement;
 	protected _button: HTMLButtonElement;
 

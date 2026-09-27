@@ -1,8 +1,7 @@
 import { Component } from '../../base/Component';
-import type { IProduct } from '../../../types';
 import { formatPrice } from '../../../utils/format';
 
-export abstract class Card extends Component<IProduct> {
+export abstract class Card<T extends { title: string; price: number | null } = { title: string; price: number | null }> extends Component<T> {
 	protected _title: HTMLElement;
 	protected _price: HTMLElement;
 
