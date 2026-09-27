@@ -1,11 +1,18 @@
 @use "variables" as *;
 @use "mixins";
 
+html.page_locked {
+  overflow: hidden;
+}
+
+
 .modal {
   @include mixins.sublayer;
   // height: max-content;
-  position: absolute;
+  position: fixed;
   display: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   justify-content: center;
   background-color: $overlayBackground;
   z-index: 100;

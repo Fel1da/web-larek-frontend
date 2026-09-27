@@ -6,6 +6,14 @@
   gap: 2rem;
   height: 100%;
 
+  &__empty {
+    margin: 0;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
   &__list {
     padding: 0;
     margin: 0;
