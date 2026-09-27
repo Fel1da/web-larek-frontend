@@ -1,34 +1,31 @@
 import { Component } from '../base/Component';
 import type { EventEmitter } from '../base/events';
-import type { IProduct } from '../../types';
-import type { TCardFactory } from '../../types';
 import { AppEvents } from '../../types';
 import { formatPrice } from '../../utils/format';
 
+/** Выводит подготовленные карточки корзины и итог заказа. */
 export class Basket extends Component {
 	protected _list: HTMLElement;
+	protected _empty: HTMLElement;
 	protected _button: HTMLButtonElement;
 	protected _price: HTMLElement;
 
-	constructor(
-		container: HTMLElement,
-		protected events: EventEmitter,
-		private cardFactory: TCardFactory<IProduct>
-	) {
+	constructor(container: HTMLElement, protected events: EventEmitter) {
 		super(container);
 		this._list = container.querySelector('.basket__list') as HTMLElement;
+		this._empty = container.querySelector('.basket__empty') as HTMLElement;
 		this._button = container.querySelector('.basket__button') as HTMLButtonElement;
 		this._price = container.querySelector('.basket__price') as HTMLElement;
-
-		this._button.addEventListener('click', () => {
-			this.events.emit(AppEvents.OrderOpen, {});
-		});
+		this._button.addEventListener('click', () => this.events.emit(AppEvents.OrderOpen, {}));
 	}
 
-	setItems(items: IProduct[], total: number): void {
-		const cards = items.map((item, i) => this.cardFactory(item, i + 1));
+	set items(cards: HTMLElement[]) {
 		this._list.replaceChildren(...cards);
-		this.setText(this._price, formatPrice(total));
-		this._button.disabled = items.length === 0;
+		this._empty.hidden = cards.length !== 0;
+		this._button.disabled = cards.length === 0;
+	}
+
+	set total(value: number) {
+		this.setText(this._price, formatPrice(value));
 	}
 }

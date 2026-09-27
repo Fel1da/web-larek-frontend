@@ -24,10 +24,12 @@ export class Modal extends Component {
 
 	open(): void {
 		this.container.classList.add('modal_active');
+		document.documentElement.classList.add('page_locked');
 	}
 
 	close(): void {
 		this.container.classList.remove('modal_active');
+		document.documentElement.classList.remove('page_locked');
 		this._content.replaceChildren();
 		this.events.emit(AppEvents.ModalClose, {});
 	}

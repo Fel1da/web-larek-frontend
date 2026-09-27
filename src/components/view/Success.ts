@@ -17,7 +17,7 @@ export class Success extends Component<{ total: number }> {
 		) as HTMLButtonElement;
 
 		this._button.addEventListener('click', () => {
-			this.events.emit(AppEvents.ModalClose, {});
+			this.events.emit(AppEvents.SuccessClose, {});
 		});
 	}
 
